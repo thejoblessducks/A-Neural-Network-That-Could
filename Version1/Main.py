@@ -6,7 +6,7 @@ import DataSet as DS
 import NeuralNetwork as NN
 
 
-filename = 'xor.txt'
+filename = 'parity4.txt'
 data = DS.DataSet(filename)
 
 n = data.getNumInputElem()
