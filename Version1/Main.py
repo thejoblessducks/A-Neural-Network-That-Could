@@ -31,8 +31,8 @@ for lr in np.arange(0.05,0.55,0.05):
             break
     print("Training with learning rate = "+str(lr)+" Epochs:"+str(epc+1))
     
-_,guess = net.feedFoward([0,1,1,1])
-#_,guess = net.feedFoward([1,0,0,0,1,1,1,1,1,0,0])
+_,_,_,guess = net.feedFoward([0,1,1,1])
+#_,_,_,guess = net.feedFoward([1,0,0,0,1,1,1,1,1,0,0])
 print(guess)
 
 
