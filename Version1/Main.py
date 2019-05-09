@@ -12,7 +12,7 @@ import NeuralNetwork as NN
 Open and read a File with data 
 -----------------------------------------------------------------------------'''
 def openDataSet(filename,v):
-    data = DS.DataSet(filename)
+    data = DS.DataSet("./Data/"+filename)
     n = data.getNumInputElem()
     inputs = data.getInputs(test=v)
     targets = data.getTargets()
@@ -44,7 +44,8 @@ def trainSame(n,inputs,targets,guessfilename):
                 break
         tb.add_row([str(ceil(lr*100.0)/100.0),str(epc+1)])
     print(tb)
-
+    print()
+    
     entries,predictions = makePrediction(net,guessfilename)
     tb = PrettyTable()
     tb.title = "Guessing Output"
@@ -52,8 +53,6 @@ def trainSame(n,inputs,targets,guessfilename):
     for entry,prediction in zip(entries,predictions):        
         tb.add_row([str(entry),str(prediction)])
     print(tb)
-    print("-----------------------------------------------------------------------------------")
-
 
 '''-----------------------------------------------------------------------------
 Train and test different Neural Networks for different Learning Rates
@@ -80,16 +79,13 @@ def trainDifferent(n,inputs,targets,guessfilename):
                 break
         tb.add_row([str(version),str(ceil(lr*100.0)/100.0),str(epc+1)])
 
-        entries,predictions = makePrediction(net,guessfilename)
-        
+        entries,predictions = makePrediction(net,guessfilename)        
         for entry,prediction in zip(entries,predictions):        
             tg.add_row([str(version),str(entry),str(prediction)])
 
     print(tb)
     print()
     print(tg)
-    print("-----------------------------------------------------------------------------------")
-
 #-------------------------------------------------------------------------------
 filename = "parity11.txt"
 guessfilename = "parity11_predictions.txt"
