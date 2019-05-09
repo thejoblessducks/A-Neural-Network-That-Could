@@ -31,11 +31,11 @@ for lr in np.arange(0.05,0.55,0.05):
     print("Training with learning rate = "+str(lr)+" Epochs:"+str(epc+1))
 
 entry = [0,1,1,1]
-_,_,_,guess = net.feedFoward(entry)
+guess = net.predict(entry)
 #entry = [1,0,0,0,1,1,1,1,1,0,0]
-#_,_,_,guess = net.feedFoward(entry)
-print("\nGuessing "+str(entry)+":\n"+str(guess))
-print("\n")
+#guess = net.predict(entry)
+print("\nGuessing "+str(entry)+": "+str(guess))
+print()
 
 print("Training diferent neural networks for diferent learning rates:")
 for version,lr in enumerate(np.arange(0.05,0.55,0.05)):

@@ -30,13 +30,14 @@ class NeuralNetwork():
             activated = self.sigmoid(all_sum)
         return all_sum,activated
 
-    def feedFoward(self,inputs):#Passes input foward in the network
+    def feedFoward(self,inputs):
+        #Passes input foward in the network
         #generating sum for hidden layer and activating it
         hidden_sum,activated_hidden = self.activation(self.weights_ih,inputs,self.bias_hidden) 
         #generating sum for output layer and activating it
         output_sum,activated_output = self.activation(self.weights_ho,activated_hidden,self.bias_out)
         return hidden_sum,output_sum,activated_hidden,activated_output
-
+    
     def backPropagation(self,inputs,targets,hidden,outputs,learning_rate):
         #Claculates the error for every result to every target
         out_error = [tval-tout for tval,tout in zip(targets,outputs)]
@@ -59,8 +60,9 @@ class NeuralNetwork():
         self.bias_hidden += delta_bias_ih
         return hidden_error,out_error,delta_ih,delta_ho,delta_bias_ih,delta_bias_ho
 
-    #Delta Calculation for 2 consecutive layers
     def deltaCalculation(self,learning_rate,activated_vector,error_vector,matrix_values):
+        #Delta Calculation for 2 consecutive layers
+    
         #Calculate gradient
         gradient = [self.sigmoid(x,deriv=True)for x in activated_vector]
         #Elementwise multiplication between the gradient and the error
@@ -72,10 +74,14 @@ class NeuralNetwork():
         #delta . (matrix_values)T --matrix multiplication
         delta = np.dot(delta,np.transpose(matrix_values))
         return delta,delta_bias
-        
+
     def train(self,inputs,targets,learning_rate):
         #Supervised learning
         #feedsfoward the data to get a result from the neural net with sigmoid aplication
         _,_,hidden,outputs = self.feedFoward(inputs) #list of values []
         _,out_error,_,_,_,_ = self.backPropagation(inputs,targets,hidden,outputs,learning_rate)
         return out_error
+    
+    def predict(self,entry):
+        _,_,_,guess = self.feedFoward(entry)
+        return guess
