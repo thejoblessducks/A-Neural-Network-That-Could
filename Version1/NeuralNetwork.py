@@ -99,7 +99,7 @@ class NeuralNetwork():
     #     the number of input units is proportional to the columns in inputs   #
     # In a future implementation we could enable multiple hidden layers        #
     ############################################################################
-    def __init__(self,ninputs,nhidden,nout):
+    def __init__(self,ninputs,nhidden,nout,testing=False):
         ##################################################################
         # We can visualize the weights for every layer as a matrix where #
         #     every row represents an input unit (that unit can be an    #
@@ -119,6 +119,8 @@ class NeuralNetwork():
         self.nhid = nhidden
         self.no = nout
         #Initiate weights randomly [-1,1]
+        if testing:
+            np.random.seed(1)
         self.weights_ih = [[np.random.uniform(-1,1) for _ in range(ninputs)]for _ in range(nhidden)]
         self.weights_ho = [[np.random.uniform(-1,1) for _ in range(nhidden)]for _ in range(nout)]
         #initiate bias randomly[0,1]

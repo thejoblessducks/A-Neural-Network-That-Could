@@ -28,19 +28,21 @@ def makePrediction(network,guessfilename):
 '''-----------------------------------------------------------------------------
 Train and test the same Neural Network for different Learning Rates
 -----------------------------------------------------------------------------'''
-def trainSame(n,inputs,targets,guessfilename):
+def trainSame(n,inputs,targets,guessfilename,testing):
     print("-----Neural Networks with "+str(n)+"Input and hidden units and 1 output unit-----\n")
-    net = NN.NeuralNetwork(n,n,1)
+    net = NN.NeuralNetwork(n,n,1,testing)
+
+    epochs = int(input("Number of Epochs:"))
 
     tb = PrettyTable()
     tb.title = "Same Network new Learning Rates"
     tb.field_names = ["Learning Rate","Epochs"]
     for lr in np.arange(0.05,0.55,0.05):
-        for epc in range(1000):
+        for epc in range(epochs):
             error = []
             for x,y in zip(inputs,targets):
                 error.append(abs(max(net.train(x,y,lr),key=abs)))
-            if sum(i <= 0.05 for i in error)>=(2*len(error))/3:
+            if sum(i <= 0.05 for i in error)==len(error):#>=(2*len(error))/3:
                 break
         tb.add_row([str(ceil(lr*100.0)/100.0),str(epc+1)])
     print(tb)
@@ -57,9 +59,11 @@ def trainSame(n,inputs,targets,guessfilename):
 '''-----------------------------------------------------------------------------
 Train and test different Neural Networks for different Learning Rates
 -----------------------------------------------------------------------------'''
-def trainDifferent(n,inputs,targets,guessfilename):
+def trainDifferent(n,inputs,targets,guessfilename,testing):
     print("-----Neural Networks with "+str(n)+"Input and hidden units and 1 output unit-----\n")
     net = NN.NeuralNetwork(n,n,1)
+
+    epochs = int(input("Number of Epochs:"))
 
     tb = PrettyTable()
     tb.title = "Different Networks new Learning Rates"
@@ -70,8 +74,8 @@ def trainDifferent(n,inputs,targets,guessfilename):
     tg.field_names = ["Network Id","Entry","Prediction"]
 
     for version,lr in enumerate(np.arange(0.05,0.55,0.05)):
-        net = NN.NeuralNetwork(n,n,1)
-        for epc in range(1000):
+        net = NN.NeuralNetwork(n,n,1,testing)
+        for epc in range(epochs):
             error = []
             for x,y in zip(inputs,targets):
                 error.append(abs(max(net.train(x,y,lr),key=abs)))
@@ -90,4 +94,4 @@ def trainDifferent(n,inputs,targets,guessfilename):
 filename = "parity11.txt"
 guessfilename = "parity11_predictions.txt"
 n,inputs,targets = openDataSet(filename,False)
-trainSame(n,inputs,targets,guessfilename)
+trainSame(n,inputs,targets,guessfilename,True)
