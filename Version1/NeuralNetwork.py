@@ -58,7 +58,9 @@ class Perceptron():
         #Adjust the weights
         weights = [w+error*x for w,x in zip(weights,inputs)]
         self.weights = weights
-    def think(self,inputs,weights):
+    def think(self,inputs,weights=None):
+        if weights is None:
+            weights = self.weights
         #Calculates the product sum, and adds the bias
         all_sum = sum([x*w]for x,w in zip(inputs,weights))+self.bias
         #Activates result
