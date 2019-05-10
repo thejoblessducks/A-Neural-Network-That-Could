@@ -62,7 +62,7 @@ def trainDifferent(n,inputs,targets,guessfilename):
     net = NN.NeuralNetwork(n,n,1)
 
     tb = PrettyTable()
-    tb.title = "Diferent Networks new Learning Rates"
+    tb.title = "Different Networks new Learning Rates"
     tb.field_names = ["Network","Learning Rate","Epochs"]
 
     tg = PrettyTable()
