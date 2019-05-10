@@ -40,6 +40,9 @@ class Perceptron():
     #     3) Compute the output of the perceptron based on that sum passed through#
     #     an activation function (sign of the sum)                                #
     #     4) Calculate the error from the output and tweak the weights and bias   #
+    #                                                                             #
+    # This class isn't used in the project, just serves as a guidence to          #
+    #   understand how a neuron in the network works                              #
     ###############################################################################
     f = lambda self,x: 0 if x<=0 else 1 #Activation function
     def __init__(self,inputs,target):
