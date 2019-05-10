@@ -1,6 +1,81 @@
+from __future__ import division
 import numpy as np
 
+
+'''-----------------------------------------------------------------------------
+Perceptron Class -- Single Layer Neuron
+-----------------------------------------------------------------------------'''
+class Perceptron():
+###############################################################################
+# This class reprecents a single neural network neuron (buiding block)        #
+# The perceptron is fed a series of inputs, each forms a connection to the    #
+#     main processing unit and after some calculations the neuron returns a   #
+#     value (the output that output can be compared with its true value       #
+#     allowing us to tweek the weights in order to produce correct results:   #
+#         gradient descent                                                    #
+#                                                                             #
+#                   X0------->|                                               #
+#                             |----->[Neuron]----->Output(y)                  #
+#                   X1------->|                                               #
+#                                                                             #
+# We need to have a weight(Wi) for every connection of inputs (Xi-->), to     #
+#     find the weights we want to find those that are optimal, that provide   #
+#     the best results with the least amount of error, in the begining we     #
+#     will have to randomly weigh all the inputs, the larger the weight the   #
+#     more influential the corresponding input.
+# The Perceptron then for all its inputs sums the product between the input   #
+#     and its weight: sum = [E(I=0 to inputs) Xi*Wi] + bias (Step 1)          #
+# After the Sum step we will apply an Activation Function that conducts the   #
+#     output towards a range, we will consider the function to be:            #
+#         f(data) = 1/(1+e^(-data))                                           #
+#                                                                             #
+# After the Perceptron thinks, it can check if the output is as expected      #
+#   calculating an error, since we can't change the input data we can only    #´
+#   change the weights in order to approach a better result, adjusting the    #
+#   weights is key in the perceptron process, as such the new weight will be: #
+#       Wi = Wi +(Y-output)*Xi                                                #
+# The algorithm can be:                                                       #
+#     1) For every input, multiply that input by its weight                   #
+#     2) Sum all of the weighted inputs                                       #
+#     3) Compute the output of the perceptron based on that sum passed through#
+#     an activation function (sign of the sum)                                #
+#     4) Calculate the error from the output and tweek the weights and bias   #
+###############################################################################
+    f = lambda self,x: 1/(1+np.exp(-1*x)) #Activation function
+    def __init__(self,inputs,target):
+        self.inputs = inputs
+        self.target = target
+        self.weights = [np.random.uniform(-1,1)for _ in inputs]
+        self.bias = np.random.uniform(-1,1)
+    def train(self):
+        inputs = self.inputs
+        weights = self.weights
+        target = self.target
+        #Process the inputs-activation
+        output = self.think(inputs,weights)
+        #Calculate the error
+        error = target-output
+        #Adjust the weights
+        weights = [w+error*x for w,x in zip(weights,inputs)]
+        self.weights = weights
+    def think(self,inputs,weights):
+        #Calculates the product sum, and adds the bias
+        all_sum = sum([x*w]for x,w in zip(inputs,weights))+self.bias
+        #Activates result
+        return self.f(all_sum)
+    
+
+
+'''-----------------------------------------------------------------------------
+Neural Network - MLPerceptron (2 layers)
+-----------------------------------------------------------------------------'''
 class NeuralNetwork():
+    '''
+    In the previous class we introduce a single neuron capable, this neuron
+        allows us to classify liniarly 
+
+
+    '''
     def __init__(self,ninputs,nhidden,nout):
         self.nin = ninputs
         self.nhid = nhidden
