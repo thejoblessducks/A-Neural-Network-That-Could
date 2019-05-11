@@ -118,22 +118,27 @@ class NeuralNetwork():
         self.nin = ninputs
         self.nhid = nhidden
         self.no = nout
-        #Initiate weights randomly [-1,1]
-        if testing:
+
+        #Testing option, locks random values to be the same in next program
+        if testing: 
             np.random.seed(1)
+
+        #Initiate weights randomly [-1,1]        
         self.weights_ih = [[np.random.uniform(-1,1) for _ in range(ninputs)]for _ in range(nhidden)]
         self.weights_ho = [[np.random.uniform(-1,1) for _ in range(nhidden)]for _ in range(nout)]
+        
         #initiate bias randomly[0,1]
         self.bias_hidden = [np.random.uniform(-1,1) for _ in range(nhidden)]
         self.bias_out = [np.random.uniform(-1,1) for _ in range(nout)]
 
     def sigmoid(self,x,deriv=False):
-        if not deriv:
-            return 1/(1+np.exp(-x))
-        return x*(1-x)
+        #Non-linear function continuous and derivable in [-1,1]
+        return (x*(1-x)) if deriv else (1/(1+np.exp(-x)))
 
     def activation(self,weights, inputs,bias):
-        #generating sum
+        #Returns SUM+bias and sigmoid(SUM+bias)
+        #SUMi = SUMi-1 + (Wi * Ii) for i = 1,..,n, and Wi the weight for input unit Ii
+
         #Since we are saving the weights in a matrix, the operation is a dot product
         all_sum = np.dot(weights,inputs)
         #Adding bias and activating
@@ -144,23 +149,32 @@ class NeuralNetwork():
         else:
             all_sum += bias
             activated = self.sigmoid(all_sum)
+        
         return all_sum,activated
 
     def feedForward(self,inputs):
         #Passes input forward in the network
+        #Returns the sum and activated sum for the hidden and output layers
+
         #generating sum for hidden layer and activating it
         hidden_sum,activated_hidden = self.activation(self.weights_ih,inputs,self.bias_hidden) 
         #generating sum for output layer and activating it
         output_sum,activated_output = self.activation(self.weights_ho,activated_hidden,self.bias_out)
+        
         return hidden_sum,output_sum,activated_hidden,activated_output
     
     def backPropagation(self,inputs,targets,hidden,outputs,learning_rate):
+        #Returns the error for hidden and output layer 
+        #Returns the weight and bias' deltas for input-hidden and hidden-output layers
+
         #Calculates the error for every result to every target
         out_error = [tval-tout for tval,tout in zip(targets,outputs)]
+
         #Calculates the errors to the hidden layer
         #The errors can be calculated using the transpose of the weights
         hidden_error = np.dot(np.transpose(self.weights_ho),out_error)
         
+        #H------------->O Layer
         #Delta Calculation for H-->O layers
         delta_ho,delta_bias_ho = self.deltaCalculation(learning_rate,outputs,out_error,hidden)
         #Adjust weights by its deltas
@@ -168,12 +182,14 @@ class NeuralNetwork():
         #Adjust bias by its deltas
         self.bias_out += delta_bias_ho
 
+        #I------------->H Layer
         #Delta Calculation for I-->H Layers
-        delta_ih,delta_bias_ih = self.deltaCalculation(learning_rate,hidden,hidden_error,inputs)
+        delta_ih,delta_bias_ih = self.deltaCalculation(learning_rate,hidden,hidden_error,inputs) 
         #Adjust weights by its deltas
         self.weights_ih += delta_ih
         #Adjust bias by its deltas
         self.bias_hidden += delta_bias_ih
+
         return hidden_error,out_error,delta_ih,delta_ho,delta_bias_ih,delta_bias_ho
 
     def deltaCalculation(self,learning_rate,activated_vector,error_vector,matrix_values):
@@ -183,6 +199,7 @@ class NeuralNetwork():
         #           [scalar]------[elementwise]--[matrix operation dot]
         #DWeights = learning_rate*(error*gradient)*Matrix
         #DBias = learning:rate*(error*gradient)
+        #Returns the delta for weights and for the bias
 
         #Calculate gradient- the sigmoid_derivate of the sigmoid values
         gradient = [self.sigmoid(x,deriv=True)for x in activated_vector]
@@ -190,19 +207,27 @@ class NeuralNetwork():
         delta = np.dot(error_vector,gradient)
         #Scalar multiplication of delta by the learning rate
         delta = np.dot(learning_rate,delta)
+
         #Bias calculation
         delta_bias = delta
+
         #delta . (matrix_values)T --matrix multiplication
         delta = np.dot(delta,np.transpose(matrix_values))
+
         return delta,delta_bias
 
     def train(self,inputs,targets,learning_rate):
         #Supervised learning
+        #Returns error for output layer
+
         #feeds forward the data to get a result from the neural net with sigmoid application
         _,_,hidden,outputs = self.feedForward(inputs) #list of values []
+
         _,out_error,_,_,_,_ = self.backPropagation(inputs,targets,hidden,outputs,learning_rate)
+        
         return out_error
     
     def predict(self,entry):
+        #Returns the network prediction for a test entry
         _,_,_,guess = self.feedForward(entry)
         return guess
