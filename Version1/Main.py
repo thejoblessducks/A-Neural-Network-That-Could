@@ -1,4 +1,5 @@
 import matplotlib as plt
+import os
 import pprint as pp
 from prettytable import PrettyTable
 import numpy as np
@@ -6,6 +7,24 @@ from math import ceil
 
 import DataSet as DS
 import NeuralNetwork as NN
+
+'''-----------------------------------------------------------------------------
+Present options for user
+-----------------------------------------------------------------------------'''
+def present():
+    print("Files:\n"+str(os.listdir("./Data/"))+"\n")
+    filename = input(str("Select input file:"))
+    print
+    guessfilename = input(str("Select test file:"))
+    print
+    is_test = input(str("Testing, make random seed (yes/no):"))
+    is_test = is_test == "yes"
+    print
+    runtimes = int(input(str("Times to run program:")))
+    print
+    func = int(input(str("Which function to choose: trainSame/trainDifferent  (0/1):")))
+    print
+    return filename,guessfilename,is_test,runtimes,func
 
 
 '''-----------------------------------------------------------------------------
@@ -18,13 +37,7 @@ def openDataSet(filename,v):
     targets = data.getTargets()
     return n,inputs,targets
 
-def makePrediction(network,guessfilename):
-    _,entries,_ = openDataSet(guessfilename,True)
-    predictions = []
-    for entry in entries:
-        prediction = network.predict(entry)
-        predictions.append(prediction)
-    return entries,predictions
+
 '''-----------------------------------------------------------------------------
 Train and test the same Neural Network for different Learning Rates
 -----------------------------------------------------------------------------'''
@@ -55,6 +68,7 @@ def trainSame(n,inputs,targets,guessfilename,testing):
     for entry,prediction in zip(entries,predictions):        
         tb.add_row([str(entry),str(prediction)])
     print(tb)
+
 
 '''-----------------------------------------------------------------------------
 Train and test different Neural Networks for different Learning Rates
@@ -90,8 +104,26 @@ def trainDifferent(n,inputs,targets,guessfilename,testing):
     print(tb)
     print()
     print(tg)
+
+
+'''-----------------------------------------------------------------------------
+Use Neural Network to make predictions for file
+-----------------------------------------------------------------------------'''
+def makePrediction(network,guessfilename):
+    _,entries,_ = openDataSet(guessfilename,True)
+    predictions = []
+    for entry in entries:
+        prediction = network.predict(entry)
+        predictions.append(prediction)
+    return entries,predictions
+
+
+
 #-------------------------------------------------------------------------------
-filename = "parity11.txt"
-guessfilename = "parity11_predictions.txt"
+filename,guessfilename,is_test,runtimes,func = present()
 n,inputs,targets = openDataSet(filename,False)
-trainSame(n,inputs,targets,guessfilename,True)
+for _ in range(runtimes):
+    if not func:
+        trainSame(n,inputs,targets,guessfilename,is_test)
+    else:
+        trainDifferent(n,inputs,targets,guessfilename,is_test)
