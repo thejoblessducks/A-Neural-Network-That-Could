@@ -10,6 +10,15 @@ from math import ceil
 import DataSet as DS
 import NeuralNetwork as NN
 
+'''
+Not our implementation,
+Author: Jianzheng Liu
+Source: https://github.com/jzliu-100/visualize-neural-network'''
+import VisualizeNN as VisNN
+
+
+
+
 '''-----------------------------------------------------------------------------
 Present options for user
 -----------------------------------------------------------------------------'''
@@ -19,16 +28,16 @@ def presentProgram():
     print
     guessfilename = input(str("Select test file:"))
     print
-    is_test = input(str("Testing, make random seed (yes/no):"))
+    is_test = input(str("Testing, fixate random seed(yes/no):"))
     is_test = is_test == "yes"
     print
     runtimes = int(input(str("Times to run program:")))
     print
-    func = int(input(str("Which function to choose: trainSame/trainDifferent  (0/1):")))
+    func = int(input(str("Which function to choose: trainSame/trainDifferent(0/1):")))
     print
     show_graph = False
     if not func:
-        show_graph = input(str("Show graph, the higher the epochs the slower the graph (yes/no):"))
+        show_graph = input(str("Show relation graph(the higher the epochs the slower the graph)(yes/no):"))
         show_graph = show_graph == "yes"
     return filename,guessfilename,is_test,runtimes,func,show_graph
 
@@ -50,8 +59,12 @@ Train and test the same Neural Network for different Learning Rates
 -----------------------------------------------------------------------------'''
 def trainSame(n,inputs,targets,guessfilename,testing,show_graph):
     print("-----Neural Networks with "+str(n)+"Input and hidden units and 1 output unit-----\n")
-    
+    #Dictionary to store all weights for every neural network to later display
+    networks_toshow = dict() 
+
     net = NN.NeuralNetwork(n,n,1,testing)
+    #Saveneural network before training
+    networks_toshow['0']= [np.array(net.weights_ih),np.array(net.weights_ho)]
     
     epochs = int(input("Number of Epochs:"))
     
@@ -74,9 +87,15 @@ def trainSame(n,inputs,targets,guessfilename,testing,show_graph):
             #Break condition
             if sum(i <= 0.05 for i in error)==len(error):#>=(2*len(error))/3:
                 break
-        #Adds row to table for learning rate and its iterations and the mean value for this learning rate
+        
+        #Round lr
         l_r = ceil(lr*100.0)/100.0
+        #Save neural network instance to later display
+        networks_toshow[str(l_r)] = [np.array(net.weights_ih),np.array(net.weights_ho)]
+
+        #Adds row to table for learning rate and its iterations and the mean value for this learning rate
         tb.add_row([str(l_r),str(epc+1),str(np.mean(errors,dtype=float))])
+        
         #Adds a new key to dictionary, keys=learning rates, values=[error for every epoch]
         learning_rate_errors[lr] = errors
     print(tb)
@@ -94,6 +113,17 @@ def trainSame(n,inputs,targets,guessfilename,testing,show_graph):
         tb.add_row([str(entry),str(prediction)])
     print(tb)
 
+    #Make png of all saved neural networks
+    for lr in networks_toshow:
+        w_i = networks_toshow[lr][0]
+        w_o = networks_toshow[lr][1]
+        if lr == '0':
+            drawNetwork([n,n,1],w_i,w_o)
+        elif lr=='0.5':
+            drawNetwork([n,n,1],w_i,w_o,'final')
+        else:
+            drawNetwork([n,n,1],w_i,w_o,lr)
+    
     #Graphs
     if show_graph:
         #User wants to see overall graph
@@ -103,7 +133,7 @@ def trainSame(n,inputs,targets,guessfilename,testing,show_graph):
     fig = plt.figure(figsize=(12, 12))
     ax = fig.gca()
     ax.axis('off')
-    draw_neural_net(ax, .1, .9, .1, .9, [n, n, 1])
+    
     plt.show()
 
 
@@ -113,7 +143,7 @@ Train and test different Neural Networks for different Learning Rates
 def trainDifferent(n,inputs,targets,guessfilename,testing):
     print("-----Neural Networks with "+str(n)+"Input and hidden units and 1 output unit-----\n")
     net = NN.NeuralNetwork(n,n,1)
-
+    drawNetwork([n,n,1])
     epochs = int(input("Number of Epochs:"))
 
     tb = PrettyTable()
@@ -157,53 +187,26 @@ def makePrediction(network,guessfilename):
     return entries,predictions
 
 
+'''-----------------------------------------------------------------------------
+Draw a Neural Network, accounting for weights
+-----------------------------------------------------------------------------'''
+def drawNetwork(network_structure,in_w=None,h_w=None,lr=None):
+    if in_w is None:
+        network = VisNN.DrawNN(network_structure)
+        network.draw(lr)
+    else:
+        weights = []
+        weights.append(in_w)
+        weights.append(np.reshape(h_w,(network_structure[1],network_structure[2])))
+        network = VisNN.DrawNN(network_structure,weights)
+        network.draw(lr)
 
 
 '''-----------------------------------------------------------------------------
-Function to show Neural Network Cartoon--Not our implementation 
-Author: Colin Raffel  https://colinraffel.com/
-Code reference: https://gist.github.com/craffel/2d727968c3aaebd10359
+Draw the 3D Graph relating learning rate(x) with epochs(y) and mean error(z)
 -----------------------------------------------------------------------------'''
-def draw_neural_net(ax, left, right, bottom, top, layer_sizes):
-    '''
-    Draw a neural network cartoon using matplotilb.
-    :usage:
-        >>> fig = plt.figure(figsize=(12, 12))
-        >>> draw_neural_net(fig.gca(), .1, .9, .1, .9, [4, 7, 2])
-    :parameters:
-        - ax : matplotlib.axes.AxesSubplot
-            The axes on which to plot the cartoon (get e.g. by plt.gca())
-        - left : float
-            The center of the leftmost node(s) will be placed here
-        - right : float
-            The center of the rightmost node(s) will be placed here
-        - bottom : float
-            The center of the bottommost node(s) will be placed here
-        - top : float
-            The center of the topmost node(s) will be placed here
-        - layer_sizes : list of int
-            List of layer sizes, including input and output dimensionality
-    '''
-    n_layers = len(layer_sizes)
-    v_spacing = (top - bottom)/float(max(layer_sizes))
-    h_spacing = (right - left)/float(len(layer_sizes) - 1)
-    # Nodes
-    for n, layer_size in enumerate(layer_sizes):
-        layer_top = v_spacing*(layer_size - 1)/2. + (top + bottom)/2.
-        for m in range(layer_size):
-            circle = plt.Circle((n*h_spacing + left, layer_top - m*v_spacing), v_spacing/4.,color='w', ec='k', zorder=4)
-            ax.add_artist(circle)
-    # Edges
-    for n, (layer_size_a, layer_size_b) in enumerate(zip(layer_sizes[:-1], layer_sizes[1:])):
-        layer_top_a = v_spacing*(layer_size_a - 1)/2. + (top + bottom)/2.
-        layer_top_b = v_spacing*(layer_size_b - 1)/2. + (top + bottom)/2.
-        for m in range(layer_size_a):
-            for o in range(layer_size_b):
-                line = plt.Line2D([n*h_spacing + left, (n + 1)*h_spacing + left],
-                                  [layer_top_a - m*v_spacing, layer_top_b - o*v_spacing], c='k')
-                ax.add_artist(line)
-
 def drawError(dictionary):
+    plt.close()
     fig = plt.figure()
     ax = fig.add_subplot(111,projection='3d')
     for lr in dictionary:
@@ -213,9 +216,11 @@ def drawError(dictionary):
     ax.set_xlabel("Learning Rate")
     ax.set_ylabel("Epochs")
     ax.set_zlabel("Mean Error")
-    plt.show()
+    fig.show()
 
-#-------------------------------------------------------------------------------
+
+
+#Program Run----------------------------------------------------------------------------
 filename,guessfilename,is_test,runtimes,func,show_graph = presentProgram()
 n,inputs,targets = openDataSet(filename,False)
 for _ in range(runtimes):
